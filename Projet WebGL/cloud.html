@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="fr">
 	<head>
-		<title>Cylindre</title>
-		<meta charset="utf-8" />
+		<title>Les arbres - Cloud</title>
+		<meta charset="utf-8">
+		
+		<!-- CSS Link -->
 		<link rel="stylesheet" href="./css/stylesheet.css">
-		<script src="./js/commonFunctions.js"></script>
+		<!-- JS Utilitary -->
 		<script src='./js/gl-matrix-min.js'></script>
 		<script src='./js/webglTools.js'></script>
+		
+		<!-- WebGL -->
+		<!-- Vertex shader -->
 		<script id="shader-vs" type="x-shader/x-vertex">
 			attribute vec3 aVertexPosition;
 			attribute vec4 aColor;
@@ -19,6 +24,7 @@
 				gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 			}
 		</script>
+		<!-- Fragment shader -->
 		<script id="shader-fs" type="x-shader/x-fragment">
 			#ifdef GL_ES
 				precision highp float;
@@ -28,6 +34,7 @@
 				gl_FragColor = vColor;
 			}
 		</script>
+		<!-- WebGL Logic -->
 		<script>
 			var vertexBuffer = null;
 			var indexBuffer = null;
@@ -145,7 +152,7 @@
 				glContext.drawElements(glContext.POINTS, indices.length, glContext.UNSIGNED_SHORT,0);
 			}
 			function initWebGL(){
-				glContext = getGLContext('webgl-canvas');
+				glContext = getGLContext('webgl-canvas-importedmesh');
 				initProgram();
 				initBuffers();
 				renderLoop();
@@ -153,14 +160,38 @@
 		</script>
 	</head>
 	<body onload="initWebGL()">
-		<script>
-		displayTitle("Ch.05 Ex.4 : Une bande de triangles pour un cube", 1,1,1,1,1,1,1);
-		</script>
-		<p>Représentation d'un cube avec une bande unique de triangles</p>
+		<h1>
+			Cloud - Transformation d'une mesh en nuage de points
+		</h1>
+		<p>Groupe 'Les arbres' : Bruno Costa, Diogo Lopes Da Silva, Valentino Izzo, Loïc Frossard</p>
+		<div id="content">
+			<h3>Importer une forme souhaitée : </h3>
+			<input type="file" id="fileUpload" name="name" accept=".obj, .json, .ply, .stl"/><br><br>
+			<button>Appliquer la transformation</button>
+
+			<div id='errorFile'>
+				<!-- Possible error when the Reader read the file -->
+			</div>
+			<div id='fileContents'>
+				<!--Div contain the content of the file-->
+			</div>
+		</div>
 		<br>
-		<canvas id="webgl-canvas" width="500" height="500">
-			HTML5 is not supported
-		</canvas>
+		<br>
+		<!-- Content of the project -->
+		<div class="container">
+			<!-- Canvas which shows the mesh in itself -->
+			<div>
+				<canvas id="webgl-canvas-importedmesh">
+					HTML5 is not supported
+				</canvas>
+			</div>
+			<!-- Canvas which shows the cloud of points of the mesh -->
+			<canvas id="webgl-canvas-pointcloud">
+				HTML5 is not supported
+			</canvas>
+		</div>
 	</body>
 	<script src='./js/mouseMotionHandling.js'></script>
+	<script src='./js/mainScript.js'></script>
 </html>

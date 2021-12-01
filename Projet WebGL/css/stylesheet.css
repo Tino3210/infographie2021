@@ -41,16 +41,6 @@ h2 {
 	text-transform: uppercase;
 	color: #3E6392;
 }
-/*
-h2:before { 
-	content: ""; 
-	position:absolute; 
-	top: 50%; 
-	left: 0; 
-	width: 100%; 
-	border-bottom: 4px solid #3E6392; 
-}
-*/
 h2 span { 
 	position:relative; 
 	display: inline-block; 
@@ -61,6 +51,14 @@ h2 span {
 h3 img {
 	vertical-align:middle;
 	margin: 0px 5px;
+}
+
+#content {
+	padding-left: 2rem;
+}
+
+.container {
+	display : flex;
 }
 
 canvas {
