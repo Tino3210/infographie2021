@@ -3,62 +3,67 @@
 	<head>
 		<title>Les arbres - Cloud</title>
 		<meta charset="utf-8">
+		<link rel="shortcut icon" href="img/atome.png">
 		
 		<!-- CSS Link -->
 		<link rel="stylesheet" href="./css/stylesheet.css">
-		<!-- JS Utilitary -->
-		<script src='./js/gl-matrix-min.js'></script>
-		<script src='./js/webglTools.js'></script>
+		<!-- JS Utilitaries -->
+		<!-- Libraries -->
+		<script src='./js/lib/gl-matrix-min.js'></script>
+		<script src='./js/lib/webglTools.js'></script>
+		<script src='./js/lib/OBJ_loader.js'></script>
+		<!-- Other scripts -->
 		<script src='./js/loadModel3D.js'></script>
-		<script src='./js/OBJ_loader.js'></script>	
 		
 		<!-- WebGL -->
 		<!-- Vertex shader -->
 		<script id="shader-vs" type="x-shader/x-vertex">
-					attribute vec3 aVertexPosition;
-					attribute vec3 aVertexNormal;
-					uniform mat4 uMVMatrix;
-					uniform mat4 uPMatrix;
-					uniform mat4 uNMatrix;
-					uniform vec3 uLightPosition;
-					varying vec3 vNormal;
-					varying vec3 vLightRay;
-					void main(void) {
-						gl_PointSize = 5.0;
-						vec4 vertex = uMVMatrix * vec4(aVertexPosition, 1.0);
-					    vNormal = vec3(uNMatrix * vec4(aVertexNormal, 1.0));
-					    vec4 light = vec4(uLightPosition,1.0);
-					    vLightRay = vertex.xyz - light.xyz;
-					    gl_Position = uPMatrix * vertex;
-					}
-				</script>
+			attribute vec3 aVertexPosition;
+			attribute vec3 aVertexNormal;
+			uniform mat4 uMVMatrix;
+			uniform mat4 uPMatrix;
+			uniform mat4 uNMatrix;
+			uniform vec3 uLightPosition;
+			varying vec3 vNormal;
+			varying vec3 vLightRay;
+			void main(void) {
+				gl_PointSize = 5.0;
+				vec4 vertex = uMVMatrix * vec4(aVertexPosition, 1.0);
+				vNormal = vec3(uNMatrix * vec4(aVertexNormal, 1.0));
+				vec4 light = vec4(uLightPosition,1.0);
+				vLightRay = vertex.xyz - light.xyz;
+				gl_Position = uPMatrix * vertex;
+			}
+		</script>
+		<!-- Fragment shader -->
 		<script id="shader-fs" type="x-shader/x-fragment">
-					#ifdef GL_ES
-					precision highp float;
-					#endif
-					uniform int uRenderType;
-					varying vec3 vNormal;
-					varying vec3 vLightRay;
-					void main(void){
-						vec3 finalColor;
-						vec3 L = normalize(vLightRay);
-						vec3 N = normalize(vNormal);
-						int assignedColorType = uRenderType;
-						if( N != vec3(0.0, 0.0, 0.0) )
-							assignedColorType+=2;
-						if (assignedColorType == 0){
-							finalColor = vec3(1.,1.,1.);
-						}else if (assignedColorType == 1){
-							finalColor = vec3(0.,0.,0.);
-						}else if (assignedColorType == 2){
-						    finalColor = vec3(1.,0.,0.);
-						}else{
-							finalColor = N;
-						}
-						gl_FragColor = vec4(finalColor, 1.0);
-					}
-				</script>
+			#ifdef GL_ES
+			precision highp float;
+			#endif
+			uniform int uRenderType;
+			varying vec3 vNormal;
+			varying vec3 vLightRay;
+			void main(void){
+				vec3 finalColor;
+				vec3 L = normalize(vLightRay);
+				vec3 N = normalize(vNormal);
+				int assignedColorType = uRenderType;
+				if( N != vec3(0.0, 0.0, 0.0) )
+					assignedColorType+=2;
+				if (assignedColorType == 0){
+					finalColor = vec3(1.,1.,1.);
+				}else if (assignedColorType == 1){
+					finalColor = vec3(0.,0.,0.);
+				}else if (assignedColorType == 2){
+					finalColor = vec3(1.,0.,0.);
+				}else{
+					finalColor = N;
+				}
+				gl_FragColor = vec4(finalColor, 1.0);
+			}
+		</script>
 		<script>
+			// Initialisation of the important values
 			var vertexBuffersArray = [];
 			var indexBuffersArray = [];
 			var normalBuffersArray = [];
@@ -71,6 +76,13 @@
 			var ty = -7.0;
 			var tz = -24;
 			var renderType = 0;
+
+			// Triangle of the mesh
+			var triangles = [];
+			// Points created from the mesh
+			var points = [];
+
+			// Used to translate the scene
 			window.onkeydown = checkKey;
 			function checkKey(ev) {
 				switch (ev.keyCode) {
@@ -111,6 +123,7 @@
 			function initLights() {
 				glContext.uniform3f(prg.lightPositionUniform, 0, 0, 1);
 			}
+			// Function used to draw an object into the scene
 			function drawObject(modelViewMatrix, vertexBuffer, normalsBuffer, indexBuffer, indexCount, glPrimitive) {
 				glContext.uniformMatrix4fv(prg.mvMatrixUniform, false, modelViewMatrix);
 				mat4.copy(nMatrix, modelViewMatrix);
@@ -124,38 +137,58 @@
 				glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, indexBuffer);
 				glContext.drawElements(glPrimitive, indexCount, glContext.UNSIGNED_SHORT, 0);
 			}
+			// Rendering loop
 			function startRenderLoop() {
 				initLights();
 				mat4.identity(mvMatrix);
-				renderLoop();
+				renderLoop(vertexBuffersArray, indexBuffersArray, normalBuffersArray, indicesArray);
 			}
-			function drawScene() {
+			// Function used to draw the scene
+			function drawScene(vertexes, normals, indexes, indices) {
 				glContext.clearColor(0.9, 0.9, 1.0, 1.0);
 				glContext.enable(glContext.DEPTH_TEST);
 				glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
-				glContext.viewport(0, 0, c_width, c_height);
-				mat4.perspective(pMatrix, degToRad(60), c_width / c_height, 0.1, 1000.0);
+				
+				// Translation matrix creation
+				translationMat = mat4.create();
+				mat4.identity(translationMat);
+				mat4.translate(translationMat, translationMat, [tx, ty, tz]);
+				rotateModelViewMatrixUsingQuaternion(true);
+
+				// Camera matrices
+				mat4.perspective(pMatrix, degToRad(60), (c_width/2) / c_height, 0.1, 1000.0);
 				glContext.uniformMatrix4fv(prg.pMatrixUniform, false, pMatrix);
-				if (indicesArray.length > 0) {
-					translationMat = mat4.create();
-					mat4.identity(translationMat);
-					mat4.translate(translationMat, translationMat, [tx, ty, tz]);
-					rotateModelViewMatrixUsingQuaternion(true);
-					var modelViewMatrix = mat4.multiply(mat4.create(), translationMat, mvMatrix);
-					renderType = 1;
+				var modelViewMatrix = mat4.multiply(mat4.create(), translationMat, mvMatrix);
+
+				// At first there is no obj object loaded in the app, this is a security
+				if (vertexBuffersArray.length > 0) {
+					// First rendering
+					// Left side of the canvas					
+					glContext.viewport(0, 0, c_width / 2, c_height);
+
+					renderType = 1; // Tell the shader to give a color to the normal per face
 					glContext.uniform1i(prg.renderTypeUniform, renderType);
-					drawObject(modelViewMatrix, vertexBuffersArray[0],
-						normalBuffersArray[0], indexBuffersArray[0], indicesArray[0].length, glContext.TRIANGLES);
-					renderType = 0;
+					drawObject(modelViewMatrix, vertexBuffersArray[0], normalBuffersArray[0], indexBuffersArray[0], indicesArray[0].length, glContext.TRIANGLES);
+										
+					// Change the perspective so that the second rendering is correctly shown
+					mat4.perspective(pMatrix, degToRad(60), c_width / c_height, 0.1, 1000.0);
+					glContext.uniformMatrix4fv(prg.pMatrixUniform, false, pMatrix);
+					
+					// Second rendering
+					// Right side of the canvas
+					glContext.viewport(c_width / 2, 0, c_width, c_height);
+
+					renderType = 1; // Tell the shader to give a color to the normal per face
 					glContext.uniform1i(prg.renderTypeUniform, renderType);
-					drawObject(modelViewMatrix, vertexBuffersArray[0],
-						normalBuffersArray[0], indexBuffersArray[0], indicesArray[0].length, glContext.LINES);
+					// If nextTriangle has been called at least once
+					if(vertexBuffersArray.length > 1) {
+						drawObject(modelViewMatrix, vertexBuffersArray[1], normalBuffersArray[1], indexBuffersArray[1], indicesArray[1].length, glContext.TRIANGLES);
+					}
 				}
 			}
 			function initWebGL() {
-				glContext = getGLContext('webgl-canvas-importedmesh');
+				glContext = getGLContext('webgl-canvas');
 				initProgram();
-				//loadModel("../public/square.obj");
 				startRenderLoop();
 			}
 		</script>
@@ -168,28 +201,26 @@
 		<div id="content">
 			<h3>Importer une forme souhaitée : </h3>
 			<input type="file" id="fileUpload" name="name" accept=".obj, .json, .ply, .stl"/><br><br>
-			<button>Appliquer la transformation</button>
+			<button id='loadOBJ'>Charger la forme</button>
+			<!-- <button id='nextTriangle'>Prochain triangle</button> -->
 
 			<div id='errorFile'>
 				<!-- Possible error when the Reader read the file -->
-			</div>			
-		</div>
-		<br>
-		<br>
-		<!-- Content of the project -->
-		<div class="container">
+			</div>
+			<br>
+			<br>
+			<!-- Content of the project -->
+			<!--
+			<span>Forme construite par des lignes</span>
+			<span>Forme construite par des triangles</span>
+			-->
 			<!-- Canvas which shows the mesh in itself -->
-			
-			<canvas id="webgl-canvas-importedmesh">
-				HTML5 is not supported
-			</canvas>
-			
-			<!-- Canvas which shows the cloud of points of the mesh -->
-			<canvas id="webgl-canvas-pointcloud">
+			<canvas id="webgl-canvas" width="1000" height="500">
 				HTML5 is not supported
 			</canvas>
 		</div>
+		
 	</body>
-	<script src='./js/mouseMotionHandling.js'></script>
+	<script src='./js/lib/mouseMotionHandling.js'></script>
 	<script src='./js/mainScript.js'></script>	
 </html>
