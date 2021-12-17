@@ -11,7 +11,31 @@ document.getElementById('loadOBJ').addEventListener('click', event => {
       triangles = getAllTriangles(handleOBJModel(file, evt.target.result));
 
       // Rasterization
+      let dots = [];
+      let rayon = 5;
+      triangles.array.forEach(triangle => {
+        let normal = Math.cross(triangle[0], triangle[1]);
+        let origin = triangle[0];
 
+        let Xs = [triangle[0][0], triangle[1][0], triangle[2][0]];
+        let Ys = [triangle[0][1], triangle[1][1], triangle[2][1]];
+        let baseXmin = Math.min(Xs);
+        let basexMax = Math.max(Xs);
+        let baseYMin = Math.min(Ys);
+        let baseYMax = Math.max(Ys);
+        
+        let circleDots = [];
+
+        let floor = 0;
+        let offset = 0;
+        for (let height = baseYMin + rayon; height < baseYMax; height += rayon){
+          offset = ((floor % 2) == 0 ? 0 : rayon);
+          for (let width = baseXmin + rayon + offset; width < basexMax; width += rayon){
+            circleDots.append([width, height]);
+          }
+          floor += 1;
+        }
+      });
     };
     // If there's an error, show it in a specific div 'errorFIle'
     reader.onerror = function (evt) {
