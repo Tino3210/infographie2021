@@ -12,8 +12,10 @@
 		<script src='./js/lib/gl-matrix-min.js'></script>
 		<script src='./js/lib/webglTools.js'></script>
 		<script src='./js/lib/OBJ_loader.js'></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.js"></script>
 		<!-- Other scripts -->
 		<script src='./js/loadModel3D.js'></script>
+		<script src='./js/pointInFace.js'></script>
 		
 		<!-- WebGL -->
 		<!-- Vertex shader -->
@@ -27,7 +29,7 @@
 			varying vec3 vNormal;
 			varying vec3 vLightRay;
 			void main(void) {
-				gl_PointSize = 5.0;
+				gl_PointSize = 1.0;
 				vec4 vertex = uMVMatrix * vec4(aVertexPosition, 1.0);
 				vNormal = vec3(uNMatrix * vec4(aVertexNormal, 1.0));
 				vec4 light = vec4(uLightPosition,1.0);
@@ -81,6 +83,8 @@
 			var triangles = [];
 			// Points created from the mesh
 			var points = [];
+			var pointsIndices = [];
+			var pointsNormales = [];
 
 			// Used to translate the scene
 			window.onkeydown = checkKey;
@@ -156,7 +160,7 @@
 				rotateModelViewMatrixUsingQuaternion(true);
 
 				// Camera matrices
-				mat4.perspective(pMatrix, degToRad(60), (c_width/2) / c_height, 0.1, 1000.0);
+				mat4.perspective(pMatrix, degToRad(60), (c_width/2)/ c_height, 0.1, 1000.0);
 				glContext.uniformMatrix4fv(prg.pMatrixUniform, false, pMatrix);
 				var modelViewMatrix = mat4.multiply(mat4.create(), translationMat, mvMatrix);
 
@@ -169,20 +173,16 @@
 					renderType = 1; // Tell the shader to give a color to the normal per face
 					glContext.uniform1i(prg.renderTypeUniform, renderType);
 					drawObject(modelViewMatrix, vertexBuffersArray[0], normalBuffersArray[0], indexBuffersArray[0], indicesArray[0].length, glContext.TRIANGLES);
-										
-					// Change the perspective so that the second rendering is correctly shown
-					mat4.perspective(pMatrix, degToRad(60), c_width / c_height, 0.1, 1000.0);
-					glContext.uniformMatrix4fv(prg.pMatrixUniform, false, pMatrix);
-					
+
 					// Second rendering
 					// Right side of the canvas
-					glContext.viewport(c_width / 2, 0, c_width, c_height);
+					glContext.viewport(c_width / 2, 0, c_width / 2, c_height);
 
 					renderType = 1; // Tell the shader to give a color to the normal per face
 					glContext.uniform1i(prg.renderTypeUniform, renderType);
 					// If nextTriangle has been called at least once
-					if(vertexBuffersArray.length > 1) {
-						drawObject(modelViewMatrix, vertexBuffersArray[1], normalBuffersArray[1], indexBuffersArray[1], indicesArray[1].length, glContext.TRIANGLES);
+					if(points.length > 0) {
+						drawObject(modelViewMatrix, vertexBuffersArray[1], normalBuffersArray[1], indexBuffersArray[1], pointsIndices.length, glContext.POINTS);						
 					}
 				}
 			}
@@ -202,18 +202,16 @@
 			<h3>Importer une forme souhaitée : </h3>
 			<input type="file" id="fileUpload" name="name" accept=".obj, .json, .ply, .stl"/><br><br>
 			<button id='loadOBJ'>Charger la forme</button>
-			<!-- <button id='nextTriangle'>Prochain triangle</button> -->
+			<br>
+			<br>
+			<label for='spaceDots'>Space between dots</label>
+			<input type="range" min="0.1" max="10" value="5" class="slider" id="spaceDots">
 
 			<div id='errorFile'>
 				<!-- Possible error when the Reader read the file -->
 			</div>
 			<br>
-			<br>
-			<!-- Content of the project -->
-			<!--
-			<span>Forme construite par des lignes</span>
-			<span>Forme construite par des triangles</span>
-			-->
+			<br>			
 			<!-- Canvas which shows the mesh in itself -->
 			<canvas id="webgl-canvas" width="1000" height="500">
 				HTML5 is not supported

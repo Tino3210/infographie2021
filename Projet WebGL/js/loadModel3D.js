@@ -13,19 +13,23 @@ var textureBuffersArray = [];
 function handleOBJModel(filename, data) {
   console.info(filename + ' has been retrieved from the server');
   var objData = new OBJ.Mesh(data);
+
   vertexBuffer = getVertexBufferWithVertices(objData.vertices);
   normalsBuffer = getVertexBufferWithVertices(objData.vertexNormals);
   textureBuffer = getVertexBufferWithVertices(objData.textures);
   indexBuffer = getIndexBufferWithIndices(objData.indices);
+
   vertexBuffersArray = [];
   normalBuffersArray = [];
   indexBuffersArray = [];
   textureBuffersArray = [];
   indicesArray = [];
+
   vertexBuffersArray.push(vertexBuffer);
   normalBuffersArray.push(normalsBuffer);
   textureBuffersArray.push(textureBuffer);
   indexBuffersArray.push(indexBuffer);
   indicesArray.push(objData.indices);
+  
   return objData;
 }

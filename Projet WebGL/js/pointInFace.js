@@ -6,12 +6,12 @@
  * If the dot product is zero or positiv then it's pointing towards us
  */
 function sameSide(p1, p2, a, b) {
-  ba = [b[0] - a[0], b[1] - a[1]];
-  p1a = [p1[0] - a[0], p2[1] - a[1]];
-  p2a = [p2[0] - a[0], p2[1] - a[1]];
-  cp1 = Math.cross(ba, p1a);
-  cp2 = Math.cross(ba, p2a);
-  if (Math.dot(cp1, cp2) >= 0) {
+  ba = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+  p1a = [p1[0] - a[0], p1[1] - a[1], p1[2] - a[2]];
+  p2a = [p2[0] - a[0], p2[1] - a[1], p2[2] - a[2]];
+  cp1 = math.cross(ba, p1a);
+  cp2 = math.cross(ba, p2a);
+  if (math.dot(cp1, cp2) >= 0) {
     return true;
   }
   return false;
