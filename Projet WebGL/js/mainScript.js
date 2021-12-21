@@ -22,9 +22,6 @@ document.getElementById('loadOBJ').addEventListener('click', event => {
         let root_point = triangles[t][0];
         let normale = triangles[t][3];
 
-        console.log('Triangle : ' + triangles[t]);
-        console.log('Normale : ' + normale);
-
         // Calculate the two vectors forming the base axis of the triangle
         // X Axis
         let v1 = [];
@@ -50,6 +47,7 @@ document.getElementById('loadOBJ').addEventListener('click', event => {
         v2[1] = (v2[1] / v2_size) * step;
         v2[2] = (v2[2] / v2_size) * step;
 
+        // v1_size_max / v1_size = > nombre de pas
         let mX = 100;
         let mY = 100;
 
@@ -108,42 +106,19 @@ document.getElementById('loadOBJ').addEventListener('click', event => {
  */
 function getAllTriangles(objData) {
   triangles = [];
-
-  for (let i = 0; i < objData.indices.length; i += 9) {
+  let indicesLength = objData.indices.length;
+  for (let i = 0; i < indicesLength; i += 3) {
     triangle = [];
-    normale = [];
+    normale = [parseFloat(objData.vertexNormals[objData.indices[i] * 3]), parseFloat(objData.vertexNormals[objData.indices[i] * 3 + 1]), parseFloat(objData.vertexNormals[objData.indices[i] * 3 + 2])];
+    
     for (let j = 0; j < 3; j++) {
       point = [];
-      for (let k = 0; k < 3; k++) {
-        point.push(
-          parseFloat(objData.vertices[objData.indices[i + 3 * j + k] - 1])
-        );
-      }
+      point.push(parseFloat(objData.vertices[objData.indices[i + j] * 3]), parseFloat(objData.vertices[objData.indices[i + j] * 3 + 1]), parseFloat(objData.vertices[objData.indices[i + j] * 3 + 2]));
       triangle.push(point);
-      normale.push(parseFloat(objData.vertexNormals[i + j]));
     }
     triangle.push(normale);
     triangles.push(triangle);
   }
-
-  /*
-  console.log(objData.indices);
-
-  for (let i = 0; i < objData.vertices.length; i += 9) {
-    triangle = [];
-    normale = [];
-    for (let j = 0; j < 3; j++) {
-      point = [];
-      for (let k = 0; k < 3; k++) {
-        point.push(parseFloat(objData.vertices[i + 3 * j + k]));
-      }      
-      triangle.push(point);
-      normale.push(parseFloat(objData.vertexNormals[i + j]));
-    }
-    triangle.push(normale);
-    triangles.push(triangle);
-  }
-  */
 
   return triangles;
 }
