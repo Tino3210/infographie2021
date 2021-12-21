@@ -194,18 +194,24 @@
 		</script>
 	</head>
 	<body onload="initWebGL()">
-		<h1>
-			Cloud - Transformation d'une mesh en nuage de points
-		</h1>
-		<p>Groupe 'Les arbres' : Bruno Costa, Diogo Lopes Da Silva, Valentino Izzo, Loïc Frossard</p>
+		<div id="header">
+			<h1>
+				Cloud - Transformation d'une mesh en nuage de points
+			</h1>
+			<p>Groupe 'Les arbres' : Bruno Costa, Diogo Lopes Da Silva, Valentino Izzo, Loïc Frossard</p>
+		</div>
 		<div id="content">
 			<h3>Importer une forme souhaitée : </h3>
-			<input type="file" id="fileUpload" name="name" accept=".obj, .json, .ply, .stl"/><br><br>
-			<button id='loadOBJ'>Charger la forme</button>
+			<label for="fileUpload" class="button" id="fileUploadLabel">
+				Choisir un .obj
+			</label>
+			<input type="file" id="fileUpload" name="file" accept=".obj, .json, .ply, .stl"/>
+			<br><br>
+			<button class="button" id='loadOBJ'>Charger la forme</button>
 			<br>
 			<br>
-			<label for='spaceDots'>Space between dots</label>
-			<input type="range" min="0.1" max="10" value="5" class="slider" id="spaceDots">
+			<label for='spaceDots'>Espace entre les points : </label><p id="valueSlider"></p><br><br>
+			<input type="range" min="0.1" max="10" step="0.1" value="1" class="slider" id="spaceDots">
 
 			<div id='errorFile'>
 				<!-- Possible error when the Reader read the file -->

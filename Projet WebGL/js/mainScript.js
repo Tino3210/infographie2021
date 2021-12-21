@@ -9,10 +9,10 @@ document.getElementById('loadOBJ').addEventListener('click', event => {
     reader.onload = function (evt) {
       // Use the handleOBJModel to draw and get specific data
       triangles = getAllTriangles(handleOBJModel(file, evt.target.result));
-    
+
       // Rasterization
       let rayon = 0.5;
-      let step = (rayon * 2); // The size of the cell in the grid
+      let step = rayon * 2; // The size of the cell in the grid
 
       points = [];
       pointsNormales = [];
@@ -21,21 +21,25 @@ document.getElementById('loadOBJ').addEventListener('click', event => {
       for (let t = triangles.length - 1; t >= 0; t--) {
         let root_point = triangles[t][0];
         let normale = triangles[t][3];
-        
-        console.log("Triangle : " + triangles[t]);
-        console.log("Normale : " + normale);
+
+        console.log('Triangle : ' + triangles[t]);
+        console.log('Normale : ' + normale);
 
         // Calculate the two vectors forming the base axis of the triangle
         // X Axis
-        let v1 = []
+        let v1 = [];
         v1[0] = triangles[t][1][0] - triangles[t][0][0];
         v1[1] = triangles[t][1][1] - triangles[t][0][1];
         v1[2] = triangles[t][1][2] - triangles[t][0][2];
-        v1_size = Math.sqrt(Math.pow(v1[0], 2) + Math.pow(v1[1], 2) + Math.pow(v1[2], 2));
+        v1_size = Math.sqrt(
+          Math.pow(v1[0], 2) + Math.pow(v1[1], 2) + Math.pow(v1[2], 2)
+        );
         // Y Axis - Normal
         let v2 = math.cross(v1, normale);
-        v2_size = Math.sqrt(Math.pow(v2[0], 2) + Math.pow(v2[1], 2) + Math.pow(v2[2], 2));
-        
+        v2_size = Math.sqrt(
+          Math.pow(v2[0], 2) + Math.pow(v2[1], 2) + Math.pow(v2[2], 2)
+        );
+
         // Unitary transformation
         // V1
         v1[0] = (v1[0] / v1_size) * step;
@@ -45,7 +49,7 @@ document.getElementById('loadOBJ').addEventListener('click', event => {
         v2[0] = (v2[0] / v2_size) * step;
         v2[1] = (v2[1] / v2_size) * step;
         v2[2] = (v2[2] / v2_size) * step;
-        
+
         let mX = 100;
         let mY = 100;
 
@@ -58,13 +62,24 @@ document.getElementById('loadOBJ').addEventListener('click', event => {
             offset = 0;
           }
 
-          for (let j = (0 + offset); j < mY; j++) {
-            v_temp[0] = parseFloat(root_point[0]) + parseFloat(i * v1[0]) + parseFloat(j * v2[0]);
-            v_temp[1] = parseFloat(root_point[1]) + parseFloat(i * v1[1]) + parseFloat(j * v2[1]);
-            v_temp[2] = parseFloat(root_point[2]) + parseFloat(i * v1[2]) + parseFloat(j * v2[2]);
+          for (let j = 0 + offset; j < mY; j++) {
+            v_temp[0] =
+              parseFloat(root_point[0]) +
+              parseFloat(i * v1[0]) +
+              parseFloat(j * v2[0]);
+            v_temp[1] =
+              parseFloat(root_point[1]) +
+              parseFloat(i * v1[1]) +
+              parseFloat(j * v2[1]);
+            v_temp[2] =
+              parseFloat(root_point[2]) +
+              parseFloat(i * v1[2]) +
+              parseFloat(j * v2[2]);
 
             // Test if the vector is in the triangle
-            if (pointInTriangle(v_temp, triangle[0], triangle[1], triangle[2])) {              
+            if (
+              pointInTriangle(v_temp, triangle[0], triangle[1], triangle[2])
+            ) {
               // Add the points to be drawn
               pointsIndices.push(points.length);
               points.push(v_temp[0]);
@@ -76,7 +91,7 @@ document.getElementById('loadOBJ').addEventListener('click', event => {
           }
         }
       }
-      
+
       vertexBuffersArray.push(getVertexBufferWithVertices(points));
       normalBuffersArray.push(getVertexBufferWithVertices(pointsNormales));
       indexBuffersArray.push(getIndexBufferWithIndices(pointsIndices));
@@ -100,8 +115,10 @@ function getAllTriangles(objData) {
     for (let j = 0; j < 3; j++) {
       point = [];
       for (let k = 0; k < 3; k++) {
-        point.push(parseFloat(objData.vertices[objData.indices[i + 3 * j + k] - 1]));
-      }      
+        point.push(
+          parseFloat(objData.vertices[objData.indices[i + 3 * j + k] - 1])
+        );
+      }
       triangle.push(point);
       normale.push(parseFloat(objData.vertexNormals[i + j]));
     }
@@ -128,5 +145,20 @@ function getAllTriangles(objData) {
   }
   */
 
-  return triangles;  
+  return triangles;
 }
+
+const inputLoader = document.getElementById('fileUpload');
+const labelInput = document.getElementById('fileUploadLabel');
+const slider = document.getElementById('spaceDots');
+const pValue = document.getElementById('valueSlider');
+pValue.textContent = slider.value;
+
+slider.addEventListener('input', event => {
+  pValue.textContent = slider.value;
+});
+
+inputLoader.addEventListener('change', event => {
+  let fileName = event.target.value.split("\\").pop();
+  labelInput.textContent = fileName;
+});
