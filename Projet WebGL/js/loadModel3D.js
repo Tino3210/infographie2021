@@ -9,6 +9,9 @@ var textureBuffersArray = [];
 
 /**
  * Get the obj raw data from the file and create a mesh and put it in the buffers which will be drawn in the scene
+ * @param {*} filename 
+ * @param {*} data 
+ * @returns 
  */
 function handleOBJModel(filename, data) {
   console.info(filename + ' has been retrieved from the server');

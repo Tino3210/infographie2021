@@ -1,6 +1,6 @@
 body {
-  font-family: 'Open Sans', Arial, serif;
-  font-size: large;
+  font-family: "Open Sans", Arial, serif;
+  font-size: medium;
   background-color: #e5e9f0;
 }
 
@@ -16,28 +16,32 @@ body {
   width: 50%;
 }
 
-#valueSlider{
+#valueSlider {
+  display: inline;
+}
+
+.time {
   display: inline;
 }
 
 input[type="file"] {
-    display: none;
+  display: none;
 }
 
-.button{
+.button {
   color: #e5e9f0;
-  background-color: #5E81AC;
+  background-color: #5e81ac;
   cursor: pointer;
   padding: 5px;
   border: 1px solid #4c688a;
   font-size: large;
 }
 
-.button:hover{
+.button:hover {
   background-color: #b7ceeb;
 }
 
-canvas{
+canvas {
   border: #d8dee9 5px solid;
 }
 
@@ -70,7 +74,7 @@ h2 span {
   width: 30%;
   height: 15px;
   border-radius: 5px;
-  background: #D8DEE9;
+  background: #d8dee9;
   outline: none;
   opacity: 0.7;
   -webkit-transition: 0.2s;
@@ -83,7 +87,7 @@ h2 span {
   width: 25px;
   height: 25px;
   border-radius: 50%;
-  background: #5E81AC;
+  background: #5e81ac;
   cursor: pointer;
 }
 
