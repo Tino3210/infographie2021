@@ -58,6 +58,20 @@ function vectorAddition(vector1, vector2) {
 }
 
 /**
+ * Multiply a vector by a factor
+ * @param {*} vector
+ * @param {*} factor 
+ * @returns v
+ */
+function vectorMultiplication(vector, factor) {
+  let v = [];  
+  v[0] = vector[0] == 0 ? 0 : vector[0] * factor;
+  v[1] = vector[1] == 0 ? 0 : vector[1] * factor;
+  v[2] = vector[2] == 0 ? 0 :  vector[2] * factor;
+  return v;
+}
+
+/**
  * Get the vector's size
  * @param {*} vector
  * @returns size
@@ -78,20 +92,6 @@ function unitaryTransformation(vector, vectorSize) {
   u[1] = (vector[1] / vectorSize);
   u[2] = (vector[2] / vectorSize);
   return u;
-}
-
-/**
- * Multiply a vector by a factor
- * @param {*} vector
- * @param {*} factor 
- * @returns v
- */
-function vectorMultiplication(vector, factor) {
-  let v = [];  
-  v[0] = vector[0] == 0 ? 0 : vector[0] * factor;
-  v[1] = vector[1] == 0 ? 0 : vector[1] * factor;
-  v[2] = vector[2] == 0 ? 0 :  vector[2] * factor;
-  return v;
 }
 
 /**
@@ -221,13 +221,36 @@ function rasterization() {
     let mX = v1_size_max / v1_size_u;
     let mY = v2_size_max / v2_size_u;
     
+    let offset = 0;
     // Main iteration --> It is here that the points will be generated
     for (let i = 0; i < mX; i++) {
       // Final vector, the point which will be added
       let v_temp = [];
 
+      if (i % 2 == 0) {
+        offset = 0;
+      } else {
+        offset = step;
+      }
+
       // Calculate each point and if it is inside the current triangle, place it in the scene
-      for (let j = 0; j < mY; j++) {
+      for (let j = (0 + offset); j < mY; j++) {
+        v_temp[0] = root_point[0] + (i * v1[0] + j * v2[0]);
+        v_temp[1] = root_point[1] + (i * v1[1] + j * v2[1]);
+        v_temp[2] = root_point[2] + (i * v1[2] + j * v2[2]);
+        
+        // Test if the vector is in the triangle
+        if (pointInTriangle(v_temp, triangle[0], triangle[1], triangle[2])) {
+          // Add the point to be drawn
+          pointsIndices.push(points.length);
+          points.push(v_temp[0], v_temp[1], v_temp[2]);
+          // Add the face's normale
+          pointsNormales.push(normale);
+        }
+
+        /*
+        ----- Mathématiques données par Mr. Gobron qui ont été testée. Seulement, le résultat est moins bon qu'avec la grille faite ci-dessus. -----
+        ----- Les calculs sont disponibles dans le dossier <justificatif> -----
         d = step;
         a = (Math.sqrt(3) * d) / 2;
         
@@ -242,27 +265,11 @@ function rasterization() {
           // Add the face's normale
           pointsNormales.push(normale);
         }
-
         // Test if the vector is in the triangle
         if (pointInTriangle(c2, triangle[0], triangle[1], triangle[2])) {
           // Add the point to be drawn
           pointsIndices.push(points.length);
           points.push(c2[0], c2[1], c2[2]);
-          // Add the face's normale
-          pointsNormales.push(normale);
-        }
-
-        /*
-        v_temp[0] = root_point[0] + (i * v1[0] + j * v2[0]);
-        v_temp[1] = root_point[1] + (i * v1[1] + j * v2[1]);
-        v_temp[2] = root_point[2] + (i * v1[2] + j * v2[2]);
-        
-
-        // Test if the vector is in the triangle
-        if (pointInTriangle(v_temp, triangle[0], triangle[1], triangle[2])) {
-          // Add the point to be drawn
-          pointsIndices.push(points.length);
-          points.push(v_temp[0], v_temp[1], v_temp[2]);
           // Add the face's normale
           pointsNormales.push(normale);
         }
@@ -291,7 +298,7 @@ document.getElementById('loadOBJ').addEventListener('click', event => {
       // Use the handleOBJModel to draw and get specific data
       triangles = getAllTriangles(handleOBJModel(file, evt.target.result));
 
-      // Call asynchronous process      
+      // Call asynchronous process
       callProcess();
     };
     // If there's an error, show it in a specific div 'errorFIle'
